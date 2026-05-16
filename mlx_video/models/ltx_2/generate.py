@@ -507,6 +507,7 @@ def denoise_distilled(
         task = progress.add_task(desc, total=num_steps)
 
         for i in range(num_steps):
+            step_t0 = time.perf_counter()  # PERF DIAG — strip after measurement
             sigma, sigma_next = sigmas[i], sigmas[i + 1]
 
             b, c, f, h, w = latents.shape
@@ -610,6 +611,12 @@ def denoise_distilled(
             mx.eval(latents)
             if enable_audio:
                 mx.eval(audio_latents)
+
+            # PERF DIAG — strip after measurement
+            print(
+                f"  [mlx-video step {i+1}/{num_steps}: {time.perf_counter() - step_t0:.2f}s]",
+                flush=True,
+            )
 
             progress.advance(task)
 
